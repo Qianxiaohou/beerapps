@@ -45,7 +45,7 @@ interface OrderItem {
   count: number;
   snapshotPrice: number;
   snapshotCost: number;
-  image?: string;    
+  image?: string;     
 }
 
 interface Order {
@@ -239,6 +239,11 @@ export default function App() {
       setIsShopOpen(newStatus); // 乐观更新
       await supabase.from('app_settings').upsert({ key: 'shop_status', value: { isOpen: newStatus } }, { onConflict: 'key' });
   };
+  
+  // 🛒 加入购物车 (之前漏掉的函数就是这个！)
+  const handleAddToCart = (pid: number) => {
+    setCart(prev => ({ ...prev, [pid]: (prev[pid] || 0) + 1 }));
+  };
 
   // 商品: 新增/更新
   const saveProductToDB = async (prod: Product) => {
@@ -321,7 +326,7 @@ export default function App() {
      // 简单逻辑：清除所有旧banner，插入新banner
      await supabase.from('banners').delete().neq('id', 0); 
      const payload = newBanners.map(b => ({
-        type: b.type, image: b.image, title: b.title, subtitle: b.subtitle
+       type: b.type, image: b.image, title: b.title, subtitle: b.subtitle
      }));
      await supabase.from('banners').insert(payload);
      alert('已發佈至雲端！');
